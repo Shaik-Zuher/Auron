@@ -2,7 +2,7 @@ import joblib
 import mysql.connector
 import requests 
 import wikipediaapi
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask,flash, request, render_template, redirect, url_for, session
 import socket
 
 app = Flask(__name__)
@@ -160,10 +160,12 @@ def get_medicine_symptoms(medicine_name):
             summary = page.summary
             sentences = summary.split(". ")  # Split into sentences
             
-            if len(sentences) > 2:
-                return ". ".join(sentences[:2]) + "."  # Return first 2 sentences, ensuring completeness
-            else:
-                return summary  # If short, return as is
+            # If we only have random data, return an error message
+            if len(sentences) < 2 or "medicine" in summary.lower():
+                return "Did you enter correct Medicine? Because no symptoms found for this medicine."
+            
+            # Return first 2 sentences or summary if it's meaningful
+            return ". ".join(sentences[:2]) + "."  # First 2 sentences
     except Exception:
         return "Failed to fetch symptoms. Please check your internet connection."
 
@@ -229,6 +231,7 @@ def logout():
     return redirect(url_for('login'))
 
 #index.html route
+
 @app.route('/main_page', methods=['GET', 'POST'])
 def main_page():
     """ Allow access to index even if the user is not logged in """
@@ -238,22 +241,43 @@ def main_page():
             gender = request.form.get('Gender')
             symptoms = request.form.get('symptoms', '').strip()
 
+            # Check if age and symptoms are provided
             if not age or not symptoms:
-                return render_template('index.html', error="Please provide valid inputs.")
+                flash("Please provide valid inputs.")
+                return redirect(url_for('main_page'))
+
+            # Split and clean up symptom list
             symptom_list = [sym.strip() for sym in symptoms.split(",") if sym.strip()]
+            
+            # Validate number of symptoms
             if len(symptom_list) < 1 or len(symptom_list) > 3:
-                return render_template('index.html', error="Please enter 1 to 3 symptoms.")
+                flash("Please enter 1 to 3 symptoms.")
+                return redirect(url_for('main_page'))
+
+            # Validate each symptom using the updated get_medicine_symptoms function
+            invalid_symptoms = []
+            for symptom in symptom_list:
+                result = get_medicine_symptoms(symptom)
+                if result == "Did you enter correct Medicine? Because no symptoms found for this medicine.":
+                    invalid_symptoms.append(symptom)
+
+            if invalid_symptoms:
+                invalid_symptom_str = ', '.join(invalid_symptoms)
+                flash(f"Invalid symptoms: {invalid_symptom_str}")
+                return redirect(url_for('main_page'))
+
+            # Proceed with model prediction if symptoms are valid
             symptom_string = ' '.join(symptom.lower() for symptom in symptom_list)
             while len(symptom_list) < 3:
                 symptom_list.append("null")
             symptom_string = ' '.join(symptom_list[:3])
             prediction = model.predict([symptom_string])
             medicine = prediction[0]
-            
+
             # Check if internet is available
             internet_available = check_internet_connection()
             medicine_image = None
-            
+
             # Only try to fetch images if internet is available
             if internet_available:
                 # Try fetching a real medicine image
@@ -262,16 +286,20 @@ def main_page():
                 if not medicine_image:
                     medicine_image = get_molecular_structure(medicine.replace(" ", "_"))
 
-            return render_template('results.html', 
-                                  gender=gender, 
-                                  age=age, 
-                                  symptoms=symptoms, 
-                                  medicine=medicine, 
-                                  medicine_image=medicine_image,
-                                  internet_available=internet_available)
-        except ValueError:
-            return render_template('index.html', error="Please enter valid data for age.")
+            # Pass the results to result page
+            return redirect(url_for('result_page', 
+                                   gender=gender, 
+                                   age=age, 
+                                   symptoms=symptoms, 
+                                   medicine=medicine, 
+                                   medicine_image=medicine_image,
+                                   internet_available=internet_available))
 
+        except ValueError:
+            flash("Please enter valid data for age.")
+            return redirect(url_for('main_page'))
+
+    # Return the index page if GET request or no error
     return render_template('index.html', user=session.get('user'))
 
 @app.route('/search_medicine', methods=['GET', 'POST'])
@@ -281,18 +309,39 @@ def search_medicine():
     internet_available = check_internet_connection()
 
     if request.method == 'POST':
-        medicine_name = request.form.get('medicine', '').strip()
-
-        if medicine_name:
-            if internet_available:
-                symptoms = get_medicine_symptoms(medicine_name)
-            else:
-                symptoms = "Internet connection is required to fetch symptoms information."
+        if 'symptoms' in request.form:  # Symptom search form
+            symptoms = request.form.get('symptoms', '').strip()
+            if symptoms:
+                return main_page()
+        elif 'medicine' in request.form:  # Medicine search form
+            medicine_name = request.form.get('medicine', '').strip()
+            if medicine_name:
+                if internet_available:
+                    symptoms = get_medicine_symptoms(medicine_name)
+                else:
+                    symptoms = "Internet connection is required to fetch symptoms information."
 
     return render_template('index.html', 
                           medicine=medicine_name, 
                           symptoms=symptoms, 
                           internet_available=internet_available)
+
+@app.after_request
+def no_cache(response):
+    response.cache_control.no_store = True  # Disable caching for form pages
+    response.cache_control.no_cache = True
+    response.cache_control.must_revalidate = True
+    return response
+
+@app.route('/result_page')
+def result_page():
+    return render_template('results.html', 
+                           gender=request.args.get('gender'), 
+                           age=request.args.get('age'), 
+                           symptoms=request.args.get('symptoms'),
+                           medicine=request.args.get('medicine'),
+                           medicine_image=request.args.get('medicine_image'),
+                           internet_available=request.args.get('internet_available'))
 
 #Route for cpr as I am using url_for('guide1') insted of direct "cpr.html"
 @app.route("/guide1")
