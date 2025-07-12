@@ -260,6 +260,18 @@ button:hover {
 .Sym {
     color: #4A4A4A;
 }
+.flashed-messages {
+    list-style-type: none;
+    padding: 10px;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    margin-top: 20px;
+}
+
+.flashed-messages li {
+    margin: 5px 0;
+}
 
 .result-box p {
     color: #A17A5E;
