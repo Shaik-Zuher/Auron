@@ -67,6 +67,7 @@
                 <option value="" disabled selected>Select</option>
                 <option value="Male" {% if gender=="Male" %}selected{% endif %}>Male</option>
                 <option value="Female" {% if gender=="Female" %}selected{% endif %}>Female</option>
+                <option value="Others" {% if gender=="Others" %}selected{% endif %}>Others</option>
             </select>
         </label>
 
@@ -81,6 +82,16 @@
         </label>
         <p style="display: none;">© 2025 Shaik Zuheruddin. All Rights Reserved.</p>
         <button class="sub" type="submit">Find Medicine</button>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashed-messages">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+
     </form>
     <div class="search-container">
         <h2>Search for a Medicine</h2>
@@ -126,22 +137,63 @@
     </footer>
     </div>
     <script>
-        function debugForm() {
-            let ageValue = document.querySelector('input[name="age"]').value;
-            console.log("Debug: Age Entered ->", ageValue);
+    // Debug the form submission by printing age entered
+    function debugForm() {
+        let ageValue = document.querySelector('input[name="age"]').value;
+        console.log("Debug: Age Entered ->", ageValue);
+    }
+
+    // Save the form data to localStorage whenever it changes
+    document.querySelector('input[name="age"]').addEventListener('input', function() {
+        localStorage.setItem('age', this.value);
+    });
+    document.querySelector('input[name="symptoms"]').addEventListener('input', function() {
+        localStorage.setItem('symptoms', this.value);
+    });
+    document.querySelector('select[name="Gender"]').addEventListener('change', function() {
+        localStorage.setItem('gender', this.value);
+    });
+
+    // Reset the form when the page loads but check for error messages
+    document.addEventListener("DOMContentLoaded", function() {
+        // Check if any error messages exist
+        if (!document.querySelector('.flashed-messages')) {
+            document.querySelector("form").reset();  // Reset the form fields
+            localStorage.removeItem('age');
+            localStorage.removeItem('symptoms');
+            localStorage.removeItem('gender');
+        } else {
+            // Populate the form with saved values from localStorage (if any)
+            const savedAge = localStorage.getItem('age');
+            const savedSymptoms = localStorage.getItem('symptoms');
+            const savedGender = localStorage.getItem('gender');
+            
+            if (savedAge) document.querySelector('input[name="age"]').value = savedAge;
+            if (savedSymptoms) document.querySelector('input[name="symptoms"]').value = savedSymptoms;
+            if (savedGender) document.querySelector('select[name="Gender"]').value = savedGender;
         }
-        function openPopup() {
-            document.getElementById("about-us-popup").style.display = "block";
-        }
-        function closePopup() {
-            document.getElementById("about-us-popup").style.display = "none";
-        }
-        function toggleMenu() {
-            document.getElementById("menu-list").classList.toggle("active");
-        }
-        document.getElementById('current-year').textContent = new Date().getFullYear();
-        console.log("%c © 2025 Shaik Zuheruddin. All Rights Reserved.", "color: #20dbca; font-size: 16px;");
-    </script>
+    });
+
+    // Function to open the popup
+    function openPopup() {
+        document.getElementById("about-us-popup").style.display = "block";
+    }
+
+    // Function to close the popup
+    function closePopup() {
+        document.getElementById("about-us-popup").style.display = "none";
+    }
+
+    // Toggle menu visibility
+    function toggleMenu() {
+        document.getElementById("menu-list").classList.toggle("active");
+    }
+
+    // Set the current year in the footer
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+    console.log("%c © 2025 Shaik Zuheruddin. All Rights Reserved.", "color: #20dbca; font-size: 16px;");
+</script>
+
     <p style="font-size: 8px; color: rgba(255, 255, 255, 0.1); position: absolute; bottom: 5px; right: 10px;">
         © Szuher 2025
     </p>
