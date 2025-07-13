@@ -6,6 +6,7 @@ from flask import Flask,flash, request, render_template, redirect, url_for, sess
 import socket
 import json
 import os
+import time
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  # Change this to a secure key
@@ -169,27 +170,33 @@ def get_medicine_symptoms(medicine_name):
     """
     if not check_internet_connection():
         return "Internet connection is required to fetch symptoms information."
-        
+
     try:
-        user_agent = "ePharmaBot/1.0 (contact: your-email@example.com)"  # Set your own user-agent
+        user_agent = "ePharmaBot/1.0 (contact: your-email@example.com)"
         wiki_wiki = wikipediaapi.Wikipedia(language='en', user_agent=user_agent)
-        
+
         page = wiki_wiki.page(medicine_name)
 
-        if page.exists():
-            summary = page.summary
-            sentences = summary.split(". ")  # Split into sentences
-            
-            # If we only have random data, return an error message
-            if len(sentences) < 2 or "medicine" in summary.lower():
-                return "Did you enter correct Medicine? Because no symptoms found for this medicine."
-            
-            # Return first 2 sentences or summary if it's meaningful
-            return ". ".join(sentences[:2]) + "."  # First 2 sentences
+        # Basic validation: page must exist and be reasonably long
+        if not page.exists() or len(page.summary.strip()) < 100:
+            return "Did you enter correct Medicine? Because no symptoms found for this medicine."
+
+        summary = page.summary
+        sentences = summary.split(". ")
+
+        # Check for keywords to ensure it's health-related
+        summary_lower = summary.lower()
+        health_keywords = ["used to", "treat", "disease", "symptom", "medical", "medicine", "drug", "health", "pharmaceutical"]
+
+        if not any(keyword in summary_lower for keyword in health_keywords):
+            return "Did you enter correct Medicine? Because no symptoms found for this medicine."
+
+        # Return first two informative sentences
+        return ". ".join(sentences[:2]).strip() + "."
+    
     except Exception:
         return "Failed to fetch symptoms. Please check your internet connection."
 
-    return "Did you enter correct Medicine? Because no symptoms found for this medicine."
 
 @app.route('/', methods=['GET'])
 def home():
@@ -198,6 +205,8 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if 'user' in session:
+        return redirect(url_for('main_page'))
     if request.method == 'POST':
         username = request.form['username'].strip()
         password = request.form['password'].strip()
@@ -219,8 +228,11 @@ def login():
             session['show_modal'] = True
             return redirect(url_for('login'))
 
+    # This runs for GET requests (after redirects)
     show_modal = session.pop('show_modal', False)
-    return render_template('login.html', show_modal=show_modal)
+    forgot_dialog = session.pop('forgot_dialog', False)
+    return render_template('login.html', show_modal=show_modal, forgot_dialog=forgot_dialog)
+
 
 @app.route('/reset_password', methods=['POST'])
 def reset_password():
@@ -231,35 +243,25 @@ def reset_password():
     conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor(dictionary=True)
 
-    # Debug: List all users
-    cursor.execute("SELECT username FROM users")
-    all_users = cursor.fetchall()
-
-    # Case-insensitive match
     cursor.execute("SELECT * FROM users WHERE LOWER(username) = LOWER(%s)", (username,))
     user = cursor.fetchone()
 
     if not user:
         flash("Username not found", "forgot-msg")
-        cursor.close()
-        conn.close()
-        return render_template("login.html", forgot_dialog=True)
-
-    if user['security_question'].strip().lower() != answer.lower():
+        session['forgot_dialog'] = True
+    elif user['security_question'].strip().lower() != answer.lower():
         flash("Security answer incorrect", "forgot-msg")
-        cursor.close()
-        conn.close()
-        return render_template("login.html", forgot_dialog=True)
-
-    cursor.execute("UPDATE users SET password = %s WHERE username = %s", (new_password, user['username']))
-    conn.commit()
-    flash("Password reset successful!", "success")
+        session['forgot_dialog'] = True
+    else:
+        cursor.execute("UPDATE users SET password = %s WHERE username = %s", (new_password, user['username']))
+        conn.commit()
+        flash("Password reset successful!", "success")
+        session['show_modal'] = True  # show login dialog
 
     cursor.close()
     conn.close()
-    return render_template("login.html", show_modal=True)
 
-
+    return redirect(url_for('login'))
 
 #signup.html route
 @app.route('/signup_page', methods=['GET', 'POST'])
@@ -291,7 +293,7 @@ def signup_page():
 @app.route('/logout')
 def logout():
     session.pop('user', None)
-    return redirect(url_for('login'))
+    return redirect(url_for('login', cache_bust=time.time()))
 
 #index.html route
 
@@ -378,11 +380,14 @@ def search_medicine():
                 return main_page()
         elif 'medicine' in request.form:  # Medicine search form
             medicine_name = request.form.get('medicine', '').strip()
-            if medicine_name:
-                if internet_available:
-                    symptoms = get_medicine_symptoms(medicine_name)
-                else:
-                    symptoms = "Internet connection is required to fetch symptoms information."
+            session['medicine_search'] = medicine_name
+            return redirect(url_for('search_medicine'))
+    medicine_name = session.pop('medicine_search', None)
+    if medicine_name:
+        if internet_available:
+            symptoms = get_medicine_symptoms(medicine_name)
+        else:
+            symptoms = "Internet connection is required to fetch symptoms information."
 
     return render_template('index.html', 
                           medicine=medicine_name, 

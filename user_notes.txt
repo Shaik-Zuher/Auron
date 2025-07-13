@@ -1,0 +1,99 @@
+Auron-Medical Recommendation System
+=======================
+
+🚀 1. SETUP ENVIRONMENT
+-----------------------
+Make sure you have Python 3.7+ installed.
+
+(Optional but recommended)
+Create a virtual environment:
+> python -m venv venv
+> venv\Scripts\activate     # On Windows
+> source venv/bin/activate  # On Mac/Linux
+
+📦 2. INSTALL DEPENDENCIES
+--------------------------
+Run:
+> pip install -r requirements.txt
+
+This installs:
+- Flask (web framework)
+- mysql-connector-python (for MySQL access)
+- requests (to fetch images and data)
+- wikipedia-api (to fetch medicine summaries)
+- joblib (for model loading)
+
+💾 3. CONFIGURE DATABASE
+------------------------
+On first run, the app will ask for your MySQL username and password
+and save it in a `db_config.json` file.
+
+It will automatically:
+- Create a `epharma` database
+- Create the `users` table if it doesn't exist
+
+🧠 4. MODEL
+-----------
+Make sure your trained `model.pkl` is in the root directory.
+This model should accept 3 symptoms and predict a medicine name.
+
+🌐 5. RUN THE APP
+-----------------
+> python app.py
+
+Visit `http://127.0.0.1:5000/` in your browser.
+
+🧪 6. TESTING NOTES
+-------------------
+- Use Login modal for user-based access.
+- Use the form to predict medicine based on symptoms.
+- Use "Reverse Search" to look up what a medicine is used for.
+- Internet connection required for image + Wikipedia API fetch.
+
+🧯 7. FIRST AID GUIDES
+----------------------
+Additional HTML pages are available:
+- CPR
+- Snake Bite
+- Fire Accidents
+- Electric Shocks
+
+✅ 8. DEPLOYMENT TIP
+---------------------
+When deploying:
+- Disable `debug=True` in `app.run()`
+- Use a proper WSGI server like Gunicorn for production
+- Secure your `secret_key` and database credentials
+
+
+📦 Adding New Packages
+----------------------------
+Whenever you install a new package (e.g., pip install some_package), make sure to update your requirements.txt:
+
+Code:
+pip freeze > requirements.txt
+
+This regenerates the list of installed packages with pinned versions.
+
+🧪 Useful Commands
+------------------------------
+Check installed packages:
+
+Code
+pip list
+
+Update pip (recommended):
+
+Code
+python -m pip install --upgrade pip
+
+
+📝 Notes
+----------------------
+time and other standard libraries are not included in requirements.txt. They come with Python.
+
+Python version recommended: 3.10+
+-------------------------------------------
+If using MySQL, make sure:
+MySQL server is running
+Credentials in db_config.json are correct
