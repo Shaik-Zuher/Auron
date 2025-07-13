@@ -1,4 +1,8 @@
 Auron-Medical Recommendation System
+
+
+Notes for creator
+
 =======================
 
 🚀 1. SETUP ENVIRONMENT
