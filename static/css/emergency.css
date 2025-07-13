@@ -240,8 +240,8 @@ footer {
     text-align: center; /* Center the text */
     font-family: Arial, sans-serif; /* A clean, professional font */
     font-size: 14px; /* Adjust the font size for readability */
-    width:100%;
-    margin-left:-7px;
+    width:101%;
+    margin-left:-9px;
     margin-bottom:-10px;
 }
 

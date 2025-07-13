@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up</title>
     <link rel="stylesheet" href="../static/css/signup_styles.css">
-
+    <link rel="apple-touch-icon" sizes="180x180" href="../static/Faviicon/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/Faviicon/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../static/Faviicon/favicon_io/favicon-16x16.png">
+    <link rel="manifest" href="../static/Faviicon/favicon_io/site.webmanifest">
 </head>
 <body>
     <div class="signup-container">
@@ -14,14 +17,14 @@
             <p class="error">{{ error }}</p>
         {% endif %}
         <form action="{{ url_for('signup_page') }}" method="post">
-
-       <!-- <form action="/signup" method="POST">-->
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required>
             
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
             
+            <label for="forget">Security Question: What is your Favorite color?</label>
+            <input type="text" id="forget" name="forget" required>
             <button type="submit">Sign Up</button>
         </form>
         

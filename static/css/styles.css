@@ -470,6 +470,7 @@ footer {
     font-size: 14px; /* Adjust the font size for readability */
     width:100%;
     margin-left: 0px;
+    margin-bottom: -12px;
 }
 
 /* Optional: Adding a subtle border-top */

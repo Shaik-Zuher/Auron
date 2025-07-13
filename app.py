@@ -57,7 +57,8 @@ def initialize_database():
         CREATE TABLE IF NOT EXISTS users (
             id INT AUTO_INCREMENT PRIMARY KEY,
             username VARCHAR(50) UNIQUE NOT NULL,
-            password VARCHAR(255) NOT NULL
+            password VARCHAR(255) NOT NULL,
+            security_question VARCHAR(255) NOT NULL
         );
     """)
 
@@ -198,8 +199,8 @@ def home():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        username = request.form['username'].strip()
+        password = request.form['password'].strip()
 
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor(dictionary=True)
@@ -212,18 +213,61 @@ def login():
 
         if user:
             session['user'] = username
-            return redirect(url_for('main_page'))  # Redirect to index after login
+            return redirect(url_for('main_page'))
         else:
-            return render_template('login.html', error="Invalid username or password")
-    return render_template('login.html')
+            flash("Invalid username or password", "login-msg")
+            session['show_modal'] = True
+            return redirect(url_for('login'))
+
+    show_modal = session.pop('show_modal', False)
+    return render_template('login.html', show_modal=show_modal)
+
+@app.route('/reset_password', methods=['POST'])
+def reset_password():
+    username = request.form['reset_username'].strip()
+    answer = request.form['reset_answer'].strip()
+    new_password = request.form['new_password'].strip()
+
+    conn = mysql.connector.connect(**db_config)
+    cursor = conn.cursor(dictionary=True)
+
+    # Debug: List all users
+    cursor.execute("SELECT username FROM users")
+    all_users = cursor.fetchall()
+
+    # Case-insensitive match
+    cursor.execute("SELECT * FROM users WHERE LOWER(username) = LOWER(%s)", (username,))
+    user = cursor.fetchone()
+
+    if not user:
+        flash("Username not found", "forgot-msg")
+        cursor.close()
+        conn.close()
+        return render_template("login.html", forgot_dialog=True)
+
+    if user['security_question'].strip().lower() != answer.lower():
+        flash("Security answer incorrect", "forgot-msg")
+        cursor.close()
+        conn.close()
+        return render_template("login.html", forgot_dialog=True)
+
+    cursor.execute("UPDATE users SET password = %s WHERE username = %s", (new_password, user['username']))
+    conn.commit()
+    flash("Password reset successful!", "success")
+
+    cursor.close()
+    conn.close()
+    return render_template("login.html", show_modal=True)
+
+
 
 #signup.html route
 @app.route('/signup_page', methods=['GET', 'POST'])
 def signup_page():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
+        username = request.form['username'].strip()
+        password = request.form['password'].strip()
+        security=request.form["forget"].strip()
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
@@ -234,13 +278,13 @@ def signup_page():
             conn.close()
             return render_template('signup.html', error="Username already exists!")
 
-        cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
+        cursor.execute("INSERT INTO users (username, password, security_question) VALUES (%s, %s, %s)", (username, password, security))
         conn.commit()
 
         cursor.close()
         conn.close()
 
-        return redirect(url_for('main_page'))
+        return redirect(url_for('login'))
 
     return render_template('signup.html')
 

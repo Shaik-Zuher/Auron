@@ -29,7 +29,7 @@
                             <a href="{{ url_for('guide4') }}">Electric Shock</a>
                         </div>
                     </li>
-                    <a href="{{ url_for('signup_page') }}"><li>Login</li></a>
+                    <a href="{{ url_for('signup_page') }}"><li>Sign Up</li></a>
                     <a href="#" onclick="openPopup()"><li>About Us</li></a>
                 </ul>
             </div>
@@ -65,63 +65,167 @@
             <h2>Try Logging In</h2>
             <div class="input-group"><button id="begin">Login</button></div>
             <p> Get personalized insights and take control of your well-being today!</p>
-            <div id="over">
-            <form action="/login" method="POST">
-                <h2>Welcome Back!</h2>
-                <div class="input-group">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" required>
+                <!-- Set flashed messages ONCE -->
+                {% set all_messages = get_flashed_messages(with_categories=true) %}
+
+                <div id="over">
+                    <form method="POST" action="{{ url_for('login') }}">
+                        <h2>Welcome Back!</h2>
+
+                        <div class="input-group">
+                            <label for="username">Username:</label>
+                            <input type="text" id="username" name="username" required>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="password">Password:</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+
+                        <p style="text-align: right;">
+                            <a href="#" id="forgot">Forgot Password?</a>
+                        </p>
+
+                        <div class="input-group">
+                            <button type="submit">Login</button>
+                        </div>
+
+                        <!-- Login-related error -->
+                        {% for category, message in all_messages %}
+                            {% if category == 'login-msg' %}
+                                <div class="flash {{ category }}">{{ message }}</div>
+                            {% endif %}
+                        {% endfor %}
+
+                        <p>Don't have an account? <a href="{{ url_for('signup_page') }}">Sign Up</a></p>
+                    </form>
+                    <button id="X">X</button>
                 </div>
-                <div class="input-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <div class="input-group">
-                    <button type="submit">Login</button>
-                </div>
-                <p>Don't have an account? <a href="{{ url_for('signup_page') }}">Sign Up</a></p>
-            </form>
-            <button id="X">X</button>
-            </div>
-        </div>
-        <div class="data">
-            <h1 id="welcome">Welcome To Auron</h1>
-        </div>
+
+                    <!-- Forgot Password Modal -->
+                    <div id="forgotModal" class="modal">
+                        <div class="modal-content">
+                            <span class="forgot-close" id="forgot-close">&times;</span>
+                            <h3>Reset Password</h3>
+                            <form id="forgot-password" method="POST" action="{{ url_for('reset_password') }}">
+                                <fieldset class="fields">
+                                    <div class="forgot-group">
+                                        <label for="reset_username">Username:</label>
+                                        <input type="text" name="reset_username" required>
+                                    </div>
+                                    <div class="forgot-group">
+                                        <label for="reset_answer">What is your favorite color?</label>
+                                        <input type="text" name="reset_answer" required>
+                                    </div>
+                                    <div class="forgot-group">
+                                        <label for="new_password">New Password:</label>
+                                        <input type="password" name="new_password" required>
+                                    </div>
+                                </fieldset>
+                                <fieldset id="reset">
+                                    <div class="forgot-group">
+                                        <button type="submit">Reset Password</button>
+                                    </div>
+                                </fieldset>
+                                <!-- Forgot-password feedback -->
+                                {% for category, message in all_messages %}
+                                    {% if category in ['forgot-msg', 'success'] %}
+                                        <div class="flash {{ category }}">{{ message }}</div>
+                                    {% endif %}
+                                {% endfor %}
+                            </form>
+                        </div>
+                    </div>
+                <!-- Modal triggers -->
+                {% if show_modal %}
+                <script>
+                window.onload = function() {
+                    document.getElementById('over').style.display = 'block';
+                };
+                </script>
+                {% endif %}
+
+                {% if forgot_dialog %}
+                <script>
+                window.onload = function() {
+                    document.getElementById('forgotModal').style.display = 'block';
+                };
+                </script>
+                {% endif %}
+    <script>
+        document.getElementById("forgot").addEventListener("click", function(e) {
+            e.preventDefault();
+            document.getElementById("forgotModal").style.display = "block";
+        });
+    </script>
+
+    </div>
     </div>
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const close = document.getElementById("over");
+            const begin = document.getElementById("begin");
+            const x = document.getElementById("X");
+            const forgotLink = document.getElementById("forgot");
+            const forgotModal = document.getElementById("forgotModal");
+            const forgotClose = document.getElementById("forgot-close");
 
-        let close=document.getElementById("over");
-        let begin=document.getElementById("begin");
-        let x=document.getElementById("X");     
-        function strtbutton(){
-            if(close.style.display=="block"){
-                close.style.display="none";
-                begin.innerText=`Login`;
-                begin.style.backgroundColor="#007bff";
+            function strtbutton() {
+                if (close.style.display === "block") {
+                    close.style.display = "none";
+                    begin.innerText = "Login";
+                    begin.style.backgroundColor = "#007bff";
+                } else {
+                    close.style.display = "block";
+                    begin.innerText = "Close";
+                    begin.style.backgroundColor = "red";
+                }
             }
-            else{
-                close.style.display="block";
-                begin.innerText=`Close`;
-                begin.style.backgroundColor="red";
+
+            function closebtn() {
+                close.style.display = "none";
+                begin.innerText = "Login";
+                begin.style.backgroundColor = "#007bff";
             }
-        };
-        function closebtn(){
-            close.style.display="none";
-            begin.innerText=`Login`;
-            begin.style.backgroundColor="#007bff";
-        }
-        begin.addEventListener("click",strtbutton);
-        x.addEventListener("click",closebtn);
-        function openPopup() {
-            document.getElementById("about-us-popup").style.display = "block";
-        }
-        function closePopup() {
-            document.getElementById("about-us-popup").style.display = "none";
-        }
-        function toggleMenu() {
-            document.getElementById("menu-list").classList.toggle("active");
-        }
+
+            begin?.addEventListener("click", strtbutton);
+            x?.addEventListener("click", closebtn);
+
+            // Forgot password modal handling
+            forgotLink?.addEventListener("click", function (e) {
+                e.preventDefault();
+                forgotModal.style.display = "block";
+            });
+
+            forgotClose?.addEventListener("click", function () {
+                forgotModal.style.display = "none";
+            });
+
+            // Close modal when clicking outside of the modal content
+            window.addEventListener("click", function (event) {
+                if (
+                    event.target === forgotModal &&
+                    !event.target.closest(".modal-content")
+                ) {
+                    forgotModal.style.display = "none";
+                }
+            });
+
+            // About and menu popup logic (optional, retained)
+            window.openPopup = function () {
+                document.getElementById("about-us-popup").style.display = "block";
+            };
+
+            window.closePopup = function () {
+                document.getElementById("about-us-popup").style.display = "none";
+            };
+
+            window.toggleMenu = function () {
+                document.getElementById("menu-list").classList.toggle("active");
+            };
+        });
     </script>
+
     <p style="display: none;">© 2025 Shaik Zuheruddin. All Rights Reserved.</p>
 </body>
 </html>
