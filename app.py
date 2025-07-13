@@ -4,6 +4,8 @@ import requests
 import wikipediaapi
 from flask import Flask,flash, request, render_template, redirect, url_for, session
 import socket
+import json
+import os
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  # Change this to a secure key
@@ -11,12 +13,29 @@ app.secret_key = "your_secret_key"  # Change this to a secure key
 # Load the trained model
 model = joblib.load('model.pkl')
 
-# MySQL Database Connection Config
-db_config = {
-    'host': 'localhost',
-    'user': 'root',  # Change if needed
-    'password': 'password'  # Set your MySQL password
-}
+CONFIG_FILE = "db_config.json"
+
+# If config file doesn't exist, prompt user to create it
+if not os.path.exists(CONFIG_FILE):
+    print("Database config not found.")
+
+    user = input("Enter your MySQL username: ")
+    password = input("Enter your MySQL password: ")
+
+    db_config = {
+        "host": "localhost",
+        "user": user,
+        "password": password
+    }
+
+    with open(CONFIG_FILE, "w") as f:
+        json.dump(db_config, f, indent=4)
+
+    print("✅ Saved database config to db_config.json")
+else:
+    with open(CONFIG_FILE, "r") as f:
+        db_config = json.load(f)
+
 
 def get_db_connection():
     return mysql.connector.connect(**db_config)
