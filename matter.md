@@ -1,5 +1,22 @@
 # How to Set Up and Run
 
+##### 📁 Project Structure
+``` bash
+Auron/
+├── model/
+├── static/
+├── templates/
+├── .gitignore
+├── app.py
+├── Contributing.md
+├── db_config.json # Auto-generated, ignored by Git
+├── model.pkl # Auto-generated, ignored by Git
+├── run_server.bat
+├── requirements.txt
+├── License
+└── README.md
+```
+
 ## 1.Follow any one of options.
 
 ### A.Clone the Repository

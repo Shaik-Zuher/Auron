@@ -33,7 +33,7 @@ Auron-Health is designed to improve healthcare accessibility and offer timely, r
 ## Docs & Community
 For Understanding and Trouble Shooting.<br>Refer
 [Docs](https://github.com/Shaik-Zuher/Auron/blob/main/matter.md)
-## Quick Start
+## Quick Start and Trouble Shooting
  - Follow [Docs](https://github.com/Shaik-Zuher/Auron/blob/main/matter.md)
 ## Philosophy Future
 This Project was created just for learing.<br>
