@@ -18,11 +18,14 @@ IF EXIST db_config.json (
     set /p DB_USER=Enter your MySQL username: 
     set /p DB_PASS=Enter your MySQL password: 
 
-    :: Create db_config.json using PowerShell
-    powershell -Command ^
-        "$config = @{host='localhost'; user='%DB_USER%'; password='%DB_PASS%'}; ^
-        $json = $config | ConvertTo-Json; ^
-        Set-Content -Path 'db_config.json' -Value $json"
+    :: Save to db_config.json using pure batch
+    (
+        echo {
+        echo     "host": "localhost",
+        echo     "user": "%DB_USER%",
+        echo     "password": "%DB_PASS%"
+        echo }
+    ) > db_config.json
 
     echo ✅ Database configuration saved to db_config.json
 )
@@ -46,6 +49,7 @@ IF NOT EXIST model.pkl (
 )
 
 :: Run the app
+start http://127.0.0.1:5000/
 flask run
 
 pause
