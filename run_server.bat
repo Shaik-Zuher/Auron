@@ -14,7 +14,7 @@ where python >nul 2>&1
 IF %ERRORLEVEL% NEQ 0 (
     echo Python not found. Attempting to install...
 
-    :: Download Python using bitsadmin (pure batch)
+    :: Download Python using bitsadmin
     bitsadmin /transfer pythonDownloadJob https://www.python.org/ftp/python/3.12.0/python-3.12.0-amd64.exe "%cd%\python-installer.exe"
 
     IF NOT EXIST python-installer.exe (
@@ -24,7 +24,7 @@ IF %ERRORLEVEL% NEQ 0 (
         exit /b
     )
 
-    :: Install Python silently for current user with PATH update
+    :: Install Python silently
     start /wait python-installer.exe /quiet InstallAllUsers=0 PrependPath=1 Include_test=0
     del python-installer.exe
 
@@ -51,7 +51,6 @@ IF EXIST db_config.json (
     )
 )
 
-
 :: === Create virtual environment if missing ===
 IF NOT EXIST .venv (
     python -m venv .venv
@@ -62,7 +61,7 @@ IF NOT EXIST .venv (
     )
 )
 
-:: === Activate virtual environment (no PowerShell) ===
+:: === Activate virtual environment ===
 call .venv\Scripts\activate.bat
 
 :: === Upgrade pip silently ===
@@ -76,10 +75,12 @@ IF NOT EXIST model.pkl (
     python model/train_model.py
 )
 
-:: === Set Flask environment and run the app ===
+:: === Set Flask environment ===
 set FLASK_APP=app.py
 set FLASK_ENV=development
-start http://127.0.0.1:5000/
-flask run
 
-pause
+:: === Open browser after short delay ===
+start "" /min cmd /c "timeout /t 5 >nul && start http://127.0.0.1:5000/"
+
+:: === Start Flask server (foreground, clean Ctrl+C) ===
+flask run
