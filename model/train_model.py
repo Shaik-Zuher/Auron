@@ -1,5 +1,8 @@
 #random forest
 
+import warnings
+warnings.filterwarnings("ignore", message="The number of unique classes is greater than 50%")
+
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split, GridSearchCV
@@ -44,7 +47,8 @@ param_grid = {
     'randomforestclassifier__min_samples_leaf': [1, 2, 4]  # Min samples in leaf nodes
 }
 
-grid_search = GridSearchCV(model, param_grid, cv=5, n_jobs=-1, verbose=1)
+grid_search = GridSearchCV(model, param_grid, cv=5, n_jobs=-1, verbose=0)
+print("\033[92mPlease wait... Model is training. This may take up to a minute.\033[0m\n")
 grid_search.fit(X_train, y_train)
 
 # Best parameters

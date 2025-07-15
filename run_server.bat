@@ -68,7 +68,10 @@ call .venv\Scripts\activate.bat
 python -m pip install --upgrade pip >nul 2>&1
 
 :: === Install dependencies ===
-pip install -r requirements.txt
+echo Installing dependencies... Please wait.
+pip install -r requirements.txt >nul 2>&1
+echo [INFO] Dependencies installed.
+
 
 :: === Train model if not already trained ===
 IF NOT EXIST model.pkl (
