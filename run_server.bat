@@ -73,7 +73,7 @@ pip install -r requirements.txt
 
 :: === Train model if not already trained ===
 IF NOT EXIST model.pkl (
-    python train_model.py
+    python model/train_model.py
 )
 
 :: === Set Flask environment and run the app ===
