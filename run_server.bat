@@ -39,19 +39,18 @@ IF %ERRORLEVEL% NEQ 0 (
 
 :: === Check if db_config.json exists ===
 IF EXIST db_config.json (
-    rem Config exists — nothing to do
+    rem Already configured
 ) ELSE (
-    set /p DB_USER=Enter your MySQL username: 
-    set /p DB_PASS=Enter your MySQL password: 
-
-    (
-        echo {
-        echo     "host": "localhost",
-        echo     "user": "%DB_USER%",
-        echo     "password": "%DB_PASS%"
-        echo }
-    ) > db_config.json
+    python configure_db.py
+    IF EXIST db_config.json (
+        rem Config created successfully
+    ) ELSE (
+        echo XXXXX Failed to create db_config.json
+        pause
+        exit /b
+    )
 )
+
 
 :: === Create virtual environment if missing ===
 IF NOT EXIST .venv (

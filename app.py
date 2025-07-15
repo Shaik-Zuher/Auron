@@ -16,12 +16,15 @@ model = joblib.load('model.pkl')
 
 CONFIG_FILE = "db_config.json"
 
-# If config file doesn't exist, prompt user to create it
 if not os.path.exists(CONFIG_FILE):
-    print("Database config not found.")
+    # Interactive fallback for developers
+    print("db_config.json not found. Let's create it now (for development).")
 
-    user = input("Enter your MySQL username: ")
-    password = input("Enter your MySQL password: ")
+    user = input("Enter your MySQL username: ").strip()
+    password = input("Enter your MySQL password: ").strip()
+
+    if not user or not password:
+        raise ValueError("Username and password cannot be empty.")
 
     db_config = {
         "host": "localhost",
@@ -32,10 +35,14 @@ if not os.path.exists(CONFIG_FILE):
     with open(CONFIG_FILE, "w") as f:
         json.dump(db_config, f, indent=4)
 
-    print("✅ Saved database config to db_config.json")
+    print("db_config.json created.")
 else:
     with open(CONFIG_FILE, "r") as f:
         db_config = json.load(f)
+
+# Optional validation
+if not db_config.get("user") or not db_config.get("password"):
+    raise ValueError("Invalid db_config.json: Username or password is empty.")
 
 
 def get_db_connection():
