@@ -7,6 +7,11 @@ import socket
 import json
 import os
 import time
+import logging
+
+# Suppress Flask's default request logs
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)  # You can also use logging.CRITICAL to hide everything
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  # Change this to a secure key
@@ -437,4 +442,5 @@ def guide4():
     return render_template("first_aid/electric_shocks.html")
 
 if __name__ == "__main__":
+    print("🚀 Flask server is running! Visit http://127.0.0.1:5000 in your browser", flush=True)
     app.run(debug=True)

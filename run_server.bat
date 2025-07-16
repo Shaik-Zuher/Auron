@@ -72,7 +72,6 @@ echo Installing dependencies... Please wait.
 pip install -r requirements.txt >nul 2>&1
 echo [INFO] Dependencies installed.
 
-
 :: === Train model if not already trained ===
 IF NOT EXIST model.pkl (
     python model/train_model.py
@@ -82,8 +81,14 @@ IF NOT EXIST model.pkl (
 set FLASK_APP=app.py
 set FLASK_ENV=development
 
+:: === Message to user ===
+echo.
+echo 🚀 Flask server is running! Visit http://127.0.0.1:5000
+echo Press CTRL+C in this window to stop the server.
+echo.
+
 :: === Open browser after short delay ===
 start "" /min cmd /c "timeout /t 5 >nul && start http://127.0.0.1:5000/"
 
-:: === Start Flask server (foreground, clean Ctrl+C) ===
+:: === Start Flask server ===
 flask run
