@@ -1,7 +1,8 @@
 #random forest
 
 import warnings
-warnings.filterwarnings("ignore", message="The number of unique classes is greater than 50%")
+warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 import pandas as pd
 import numpy as np
