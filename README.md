@@ -34,6 +34,10 @@ Auron-Health is designed to improve healthcare accessibility and offer timely, r
 For Understanding and Trouble Shooting.<br>Refer
 [Docs](https://github.com/Shaik-Zuher/Auron/blob/main/matter.md)
 ## Quick Start and Trouble Shooting
+ - Important points:
+   - Python and mysql are needed and paths must be set globally.You can search Youtube.
+   - When running first time it takes some time because model is being trained so please wait(Max wait time- 4 mins).
+   - If site shows page not found  Refresh page after 10 seconds.It takes time when starting first step.
  - Follow [Docs](https://github.com/Shaik-Zuher/Auron/blob/main/matter.md)
 ## Philosophy Future
 This Project was created just for learing.<br>

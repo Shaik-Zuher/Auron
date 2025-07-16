@@ -89,6 +89,7 @@ echo.
 
 :: === Open browser after short delay ===
 start "" /min cmd /c "timeout /t 5 >nul && start http://127.0.0.1:5000/"
-
+echo If site shows page not found  Refresh page after 10 seconds.
+echo It takes time when starting first step.
 :: === Start Flask server ===
 flask run
