@@ -129,3 +129,25 @@ Or delete the file and re-run to regenerate it
 We do not commit model.pkl to GitHub (it's large).
 
 If it's missing, the .bat file or train_model.py will recreate it.
+
+## 4.Python not found
+
+Error:
+
+``` bash
+pgsql
+
+python is not installed or not added to PATH!
+```
+Fix:
+
+Install Python Server from https://www.python.org/downloads/windows/
+
+Make sure python is added to your system PATH
+
+## Additional issues:
+
+If bat closes itself it means sql or python not properly reinstall them.
+After running and opening in browser shows page not found- reload page.
+If you had run project before without any problems.But now doesn't work means .venv is corrupted-Delete .venv run run_server.bat
+Any other errors-Ask Chatgpt
