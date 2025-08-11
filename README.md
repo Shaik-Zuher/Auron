@@ -7,7 +7,7 @@
 * [What is Auron?](#What-is-Auron?)
 * [Features](#Features)
 * [Docs](#docs--community)
-* [Quick Start](#Quick-Start)
+* [Quick Start](#Quick-Start-Trouble-Shooting)
 * [Philosophy Future](#Philosophy-Future)
 * [Contributing to Auron](#Contributing)
 * [TC (Technical Committee)](#tc-technical-committee)
